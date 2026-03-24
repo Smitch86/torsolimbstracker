@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Lift Log</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface2: #242424;
+  --border: #2e2e2e;
+  --yellow: #FFD600;
+  --yellow-dim: #b39800;
+  --red: #FF4545;
+  --green: #36d67b;
+  --blue: #4A90FF;
+  --text: #f0f0f0;
+  --text-dim: #888;
+  --text-muted: #555;
+  --radius: 12px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; background:var(--bg); color:var(--text); font-family:'Barlow',sans-serif; }
+body { max-width:480px; margin:0 auto; min-height:100vh; overflow-x:hidden; }
+
+.page { display:none; min-height:100vh; }
+.page.active { display:block; }
+
+/* ── USER SELECT ── */
+#page-userselect {
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  min-height:100vh; padding:40px 24px; text-align:center;
+  background: linear-gradient(160deg, #1a1a1a 0%, #0f0f0f 100%);
+}
+#page-userselect.active { display:flex; }
+
+/* ── WELCOME ── */
+#page-welcome {
+  display:none; flex-direction:column; align-items:center; justify-content:center;
+  min-height:100vh; padding:40px 24px; text-align:center;
+  background: linear-gradient(160deg, #1a1a1a 0%, #0f0f0f 100%);
+}
+#page-welcome.active { display:flex; }
+
+.welcome-title {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:72px; font-weight:800; line-height:1;
+  color:var(--yellow); letter-spacing:-1px;
+  margin-bottom:4px;
+}
+.welcome-sub {
+  font-size:14px; color:var(--text-dim); letter-spacing:0.1em;
+  text-transform:uppercase; margin-bottom:32px;
+}
+.barbell-wrap { width:100%; max-width:320px; margin:0 auto 36px; }
+.barbell-svg { width:100%; }
+
+.question {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:28px; font-weight:700; color:var(--text);
+  margin-bottom:24px; letter-spacing:0.01em;
+}
+
+/* User buttons */
+.user-btn-row { display:flex; gap:14px; width:100%; margin-bottom:24px; }
+.user-btn {
+  flex:1; padding:24px 10px;
+  background:var(--surface); border:2px solid var(--border);
+  border-radius:var(--radius); color:var(--text);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:32px; font-weight:800; letter-spacing:0.04em;
+  cursor:pointer; text-align:center;
+  transition:all 0.15s;
+}
+.user-btn:active { transform:scale(0.97); }
+.user-btn.simon { border-color:#FF6B35; }
+.user-btn.simon:active, .user-btn.simon:hover { background:#FF6B3520; }
+.user-btn.joe { border-color:var(--blue); }
+.user-btn.joe:active, .user-btn.joe:hover { background:#4A90FF20; }
+.user-sub { font-family:'Barlow',sans-serif; font-size:11px; font-weight:400; color:var(--text-dim); letter-spacing:0.06em; text-transform:uppercase; display:block; margin-top:4px; }
+
+.workout-btn {
+  width:100%; padding:18px 20px;
+  background:var(--surface); border:2px solid var(--border);
+  border-radius:var(--radius); color:var(--text);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:22px; font-weight:700; letter-spacing:0.03em;
+  cursor:pointer; text-align:left;
+  display:flex; align-items:center; gap:14px;
+  transition:all 0.15s; margin-bottom:10px;
+}
+.workout-btn:active { transform:scale(0.98); }
+.workout-btn.torso { border-color:#FF6B35; }
+.workout-btn.torso:hover { background:#FF6B3515; }
+.workout-btn.limbs { border-color:var(--blue); }
+.workout-btn.limbs:hover { background:#4A90FF15; }
+.workout-btn.home { border-color:var(--green); }
+.workout-btn.home:hover { background:#36d67b15; }
+.workout-btn .btn-icon { font-size:28px; }
+.workout-btn .btn-text { display:flex; flex-direction:column; }
+.workout-btn .btn-label { font-size:22px; line-height:1.1; }
+.workout-btn .btn-hint { font-family:'Barlow',sans-serif; font-size:11px; font-weight:400; color:var(--text-dim); letter-spacing:0.05em; text-transform:uppercase; }
+
+.nav-row { display:flex; gap:10px; width:100%; margin-top:16px; }
+.nav-small-btn {
+  flex:1; padding:12px; background:var(--surface2);
+  border:1px solid var(--border); border-radius:var(--radius);
+  color:var(--text-dim); font-family:'Barlow',sans-serif;
+  font-size:13px; font-weight:500; cursor:pointer;
+  display:flex; flex-direction:column; align-items:center; gap:4px;
+  transition:all 0.15s;
+}
+.nav-small-btn:active { transform:scale(0.97); }
+.nav-small-btn .ns-icon { font-size:20px; }
+
+/* user pill shown on welcome */
+.user-pill {
+  display:inline-flex; align-items:center; gap:8px;
+  background:var(--surface2); border:1px solid var(--border);
+  border-radius:20px; padding:6px 14px; margin-bottom:20px;
+  font-size:13px; color:var(--text-dim); cursor:pointer;
+}
+.user-pill strong { color:var(--yellow); font-family:'Barlow Condensed',sans-serif; font-size:16px; letter-spacing:0.05em; }
+
+/* ── WORKOUT PAGE ── */
+#page-workout { padding:0 0 100px; }
+.workout-header {
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:16px 20px 14px;
+  position:sticky; top:0; z-index:50;
+}
+.wh-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:2px; }
+.back-btn {
+  background:none; border:none; color:var(--text-dim);
+  font-size:13px; cursor:pointer; padding:4px 0;
+  display:flex; align-items:center; gap:6px;
+}
+.workout-type-badge {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:18px; font-weight:700;
+  padding:4px 12px; border-radius:6px;
+}
+.badge-torso { background:#FF6B3520; color:#FF6B35; border:1px solid #FF6B3540; }
+.badge-limbs { background:#4A90FF20; color:var(--blue); border:1px solid #4A90FF40; }
+.badge-home { background:#36d67b20; color:var(--green); border:1px solid #36d67b40; }
+.wh-date { font-size:12px; color:var(--text-dim); }
+.wh-timer { font-family:'Barlow Condensed',sans-serif; font-size:18px; color:var(--yellow); font-weight:600; }
+
+.exercise-section { padding:16px 16px 8px; }
+.section-label { font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:0.12em; color:var(--text-muted); margin-bottom:10px; }
+
+.exercise-row {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; margin-bottom:8px; overflow:hidden;
+  transition:border-color 0.2s;
+}
+.exercise-row.has-sets { border-color:var(--yellow-dim); }
+.exercise-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:14px 14px; cursor:pointer;
+}
+.exercise-name { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:600; color:var(--text); flex:1; }
+.ex-set-count { font-size:11px; color:var(--yellow); font-weight:600; margin-right:10px; }
+.ex-chevron { color:var(--text-muted); font-size:14px; transition:transform 0.2s; }
+.exercise-row.open .ex-chevron { transform:rotate(180deg); }
+
+.sets-panel { display:none; padding:0 14px 14px; border-top:1px solid var(--border); }
+.exercise-row.open .sets-panel { display:block; }
+
+.set-entry {
+  background:var(--surface2); border-radius:8px; padding:12px;
+  margin-bottom:8px; border:1px solid var(--border);
+}
+.set-label { font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; color:var(--yellow); margin-bottom:10px; }
+.set-fields { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:8px; }
+.set-fields.bilateral { grid-template-columns:1fr 1fr 1fr; }
+.field-group { display:flex; flex-direction:column; gap:4px; }
+.field-label { font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.08em; font-weight:600; }
+.field-input {
+  background:var(--bg); border:1px solid var(--border);
+  border-radius:7px; padding:8px 10px;
+  color:var(--text); font-family:'Barlow',sans-serif; font-size:15px; font-weight:500;
+  outline:none; width:100%; -webkit-appearance:none;
+}
+.field-input:focus { border-color:var(--yellow); }
+.field-input::placeholder { color:var(--text-muted); font-size:13px; }
+.field-input.notes { font-size:13px; }
+.set-preview { font-size:14px; color:var(--green); margin-top:6px; min-height:16px; font-family:'Barlow Condensed',sans-serif; }
+.set-row-actions { display:flex; gap:8px; margin-top:8px; }
+.remove-set-btn { background:none; border:1px solid #FF454540; color:var(--red); border-radius:6px; padding:5px 10px; font-size:12px; cursor:pointer; font-family:'Barlow',sans-serif; }
+.add-set-btn { width:100%; padding:10px; margin-top:4px; background:none; border:1px dashed var(--border); border-radius:8px; color:var(--text-dim); font-family:'Barlow',sans-serif; font-size:13px; cursor:pointer; transition:all 0.15s; }
+.add-set-btn:active { background:var(--surface2); }
+
+.other-input-wrap { padding:12px 0 4px; }
+.other-name-input { background:var(--bg); border:1px solid var(--yellow-dim); border-radius:8px; padding:10px 12px; color:var(--text); font-family:'Barlow',sans-serif; font-size:15px; outline:none; width:100%; margin-bottom:10px; }
+.other-name-input::placeholder { color:var(--text-muted); }
+.confirm-other-btn { padding:8px 18px; background:var(--yellow); color:#000; border:none; border-radius:7px; font-family:'Barlow',sans-serif; font-size:13px; font-weight:700; cursor:pointer; }
+
+.complete-bar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; padding:12px 16px 20px; background:linear-gradient(to top, var(--bg) 70%, transparent); z-index:60; }
+.complete-workout-btn { width:100%; padding:16px; background:var(--yellow); color:#000; border:none; border-radius:var(--radius); font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; letter-spacing:0.04em; cursor:pointer; transition:all 0.15s; }
+.complete-workout-btn:active { transform:scale(0.98); background:#e6c100; }
+
+/* ── REVIEW ── */
+#page-review { padding:20px 16px 100px; }
+.review-header { display:flex; align-items:center; gap:12px; margin-bottom:24px; }
+.review-title { font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:800; color:var(--yellow); }
+.review-date { font-size:13px; color:var(--text-dim); margin-top:2px; }
+.review-exercise { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px; margin-bottom:12px; }
+.review-ex-name { font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; color:var(--text); margin-bottom:10px; border-bottom:1px solid var(--border); padding-bottom:8px; }
+.review-set-line { font-family:'Barlow Condensed',sans-serif; font-size:15px; color:var(--green); margin-bottom:4px; line-height:1.4; }
+.review-set-line .set-notes { color:var(--text-dim); font-size:13px; }
+.export-bar { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:480px; padding:12px 16px 20px; background:linear-gradient(to top, var(--bg) 70%, transparent); display:flex; gap:10px; z-index:60; }
+.export-btn { flex:1; padding:14px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); color:var(--text); font-family:'Barlow',sans-serif; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.15s; }
+.export-btn.primary { background:var(--yellow); color:#000; border-color:var(--yellow); }
+.export-btn:active { transform:scale(0.97); }
+
+/* ── HISTORY ── */
+#page-history { padding:20px 16px 80px; }
+.history-title { font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:800; color:var(--yellow); margin-bottom:20px; }
+.history-session { background:var(--surface); border:1px solid var(--border); border-radius:10px; margin-bottom:12px; overflow:hidden; }
+.history-session-header { display:flex; justify-content:space-between; align-items:center; padding:14px 14px; cursor:pointer; }
+.hs-date { font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; }
+.hs-type { font-size:12px; color:var(--text-dim); margin-top:2px; }
+.hs-count { font-size:12px; color:var(--yellow); }
+.history-session-body { display:none; padding:0 14px 14px; border-top:1px solid var(--border); }
+.history-session.open .history-session-body { display:block; }
+.empty-history { text-align:center; padding:60px 20px; color:var(--text-muted); font-size:15px; }
+
+/* last week highlight */
+.last-week-badge { display:inline-block; background:#FFD60020; color:var(--yellow); border:1px solid #FFD60040; border-radius:6px; font-size:10px; font-weight:700; padding:2px 7px; margin-left:8px; letter-spacing:0.06em; text-transform:uppercase; vertical-align:middle; }
+
+.coming-soon { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:60vh; padding:40px 24px; text-align:center; }
+.coming-soon h2 { font-family:'Barlow Condensed',sans-serif; font-size:36px; font-weight:800; color:var(--green); margin-bottom:12px; }
+.coming-soon p { color:var(--text-dim); font-size:15px; line-height:1.6; }
+
+@keyframes prSlideIn {
+  from { transform:translateX(-50%) translateY(-100%); opacity:0; }
+  to   { transform:translateX(-50%) translateY(0);    opacity:1; }
+}
+@keyframes prSlideOut {
+  from { transform:translateX(-50%) translateY(0);    opacity:1; }
+  to   { transform:translateX(-50%) translateY(-100%); opacity:0; }
+}
+
+/* ── PR BADGES ── */
+.pr-badge {
+  display:inline-block;
+  background:linear-gradient(135deg,#FFD600,#FF6B35);
+  color:#000; font-family:'Barlow Condensed',sans-serif;
+  font-size:11px; font-weight:800; letter-spacing:0.08em;
+  padding:2px 8px; border-radius:4px; margin-left:8px;
+  vertical-align:middle; text-transform:uppercase;
+}
+
+/* ── RECORDS PAGE ── */
+.pr-entry {
+  background:var(--surface); border:1px solid var(--border);
+  border-radius:10px; padding:14px 16px; margin-bottom:8px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.pr-entry-left { flex:1; }
+.pr-entry-ex { font-family:'Barlow Condensed',sans-serif; font-size:17px; font-weight:700; color:var(--text); }
+.pr-entry-detail { font-size:12px; color:var(--text-dim); margin-top:2px; }
+.pr-entry-right { text-align:right; flex-shrink:0; margin-left:12px; }
+.pr-entry-value { font-family:'Barlow Condensed',sans-serif; font-size:22px; font-weight:800; color:var(--yellow); }
+.pr-entry-type { font-size:10px; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-top:1px; }
+.pr-date-header {
+  font-size:10px; font-weight:700; text-transform:uppercase;
+  letter-spacing:0.1em; color:var(--text-muted);
+  padding:16px 0 6px; border-bottom:1px solid var(--border);
+  margin-bottom:8px;
+}
+.pr-date-header:first-child { padding-top:0; }
+.muscle-group { margin-bottom:6px; }
+.muscle-group-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 14px 8px;
+  border-left:4px solid var(--group-color, #888);
+  margin-bottom:6px; margin-top:14px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--group-color, #888) 12%, transparent), transparent);
+  border-radius:0 6px 6px 0;
+}
+.muscle-group-name {
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:20px; font-weight:800; letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--group-color, #888);
+}
+.muscle-group-tick {
+  width:26px; height:26px; border-radius:50%;
+  border:2px solid var(--group-color, #888);
+  display:flex; align-items:center; justify-content:center;
+  font-size:14px; color:var(--group-color, #888);
+  opacity:0.3; transition:all 0.3s;
+  flex-shrink:0;
+}
+.muscle-group-tick.done {
+  opacity:1;
+  background:var(--group-color, #888);
+  color:#000;
+  border-color:var(--group-color, #888);
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ USER SELECT ═══════════════ -->
+<div id="page-userselect" class="page active">
+  <div class="welcome-title">LIFT LOG</div>
+  <div class="welcome-sub">Who's training?</div>
+  <div class="barbell-wrap">
+    <svg class="barbell-svg" viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="28" width="14" height="24" rx="3" fill="#FFD600"/>
+      <rect x="34" y="20" width="12" height="40" rx="3" fill="#e0e0e0"/>
+      <rect x="46" y="24" width="9" height="32" rx="2" fill="#bdbdbd"/>
+      <rect x="55" y="35" width="210" height="10" rx="5" fill="#9e9e9e"/>
+      <rect x="265" y="24" width="9" height="32" rx="2" fill="#bdbdbd"/>
+      <rect x="274" y="20" width="12" height="40" rx="3" fill="#e0e0e0"/>
+      <rect x="286" y="28" width="14" height="24" rx="3" fill="#FFD600"/>
+      <line x1="100" y1="36" x2="100" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="108" y1="36" x2="108" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="116" y1="36" x2="116" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="204" y1="36" x2="204" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="212" y1="36" x2="212" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="220" y1="36" x2="220" y2="44" stroke="#777" stroke-width="1.5"/>
+    </svg>
+  </div>
+  <div class="user-btn-row">
+    <button class="user-btn simon" onclick="selectUser('simon')">
+      SIMON<span class="user-sub">Tap to log in</span>
+    </button>
+    <button class="user-btn joe" onclick="selectUser('joe')">
+      JOE<span class="user-sub">Tap to log in</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════ WELCOME ═══════════════ -->
+<div id="page-welcome" class="page">
+  <div class="welcome-title">LIFT LOG</div>
+  <div class="welcome-sub" id="welcome-sub">Training Tracker</div>
+  <div id="user-pill-wrap">
+    <div class="user-pill" onclick="showPage('userselect')">
+      Logged in as <strong id="user-pill-name"></strong> &nbsp;· switch
+    </div>
+  </div>
+  <div class="barbell-wrap">
+    <svg class="barbell-svg" viewBox="0 0 320 80" xmlns="http://www.w3.org/2000/svg">
+      <rect x="20" y="28" width="14" height="24" rx="3" fill="#FFD600"/>
+      <rect x="34" y="20" width="12" height="40" rx="3" fill="#e0e0e0"/>
+      <rect x="46" y="24" width="9" height="32" rx="2" fill="#bdbdbd"/>
+      <rect x="55" y="35" width="210" height="10" rx="5" fill="#9e9e9e"/>
+      <rect x="265" y="24" width="9" height="32" rx="2" fill="#bdbdbd"/>
+      <rect x="274" y="20" width="12" height="40" rx="3" fill="#e0e0e0"/>
+      <rect x="286" y="28" width="14" height="24" rx="3" fill="#FFD600"/>
+      <line x1="100" y1="36" x2="100" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="108" y1="36" x2="108" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="116" y1="36" x2="116" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="204" y1="36" x2="204" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="212" y1="36" x2="212" y2="44" stroke="#777" stroke-width="1.5"/>
+      <line x1="220" y1="36" x2="220" y2="44" stroke="#777" stroke-width="1.5"/>
+    </svg>
+  </div>
+  <div class="question">What are you training today?</div>
+  <button class="workout-btn torso" onclick="startWorkout('torso')">
+    <span class="btn-icon">💪</span>
+    <span class="btn-text"><span class="btn-label">TORSO</span><span class="btn-hint">Chest · Back · Shoulders</span></span>
+  </button>
+  <button class="workout-btn limbs" onclick="startWorkout('limbs')">
+    <span class="btn-icon">🦵</span>
+    <span class="btn-text"><span class="btn-label">LIMBS</span><span class="btn-hint">Quads · Hams · Glutes · Arms</span></span>
+  </button>
+  <button class="workout-btn home" onclick="startWorkout('home')">
+    <span class="btn-icon">🏠</span>
+    <span class="btn-text"><span class="btn-label">FULL BODY HOME WORKOUT</span><span class="btn-hint">Bodyweight & bands</span></span>
+  </button>
+  <div class="nav-row">
+    <button class="nav-small-btn" onclick="showPage('history')">
+      <span class="ns-icon">📋</span><span>History</span>
+    </button>
+    <button class="nav-small-btn" onclick="showPage('lastweek')">
+      <span class="ns-icon">📅</span><span>Last Week</span>
+    </button>
+    <button class="nav-small-btn" onclick="showPage('records')">
+      <span class="ns-icon">🏆</span><span>PRs</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════ WORKOUT ═══════════════ -->
+<div id="page-workout" class="page">
+  <div class="workout-header">
+    <div class="wh-top">
+      <button class="back-btn" onclick="showPage('welcome')">← Back</button>
+      <span class="workout-type-badge" id="workout-badge"></span>
+      <span class="wh-timer" id="workout-timer">00:00</span>
+    </div>
+    <div class="wh-date" id="workout-date"></div>
+  </div>
+  <div class="exercise-section">
+    <div class="section-label">Select exercises — tap to log sets</div>
+    <div id="exercise-list"></div>
+  </div>
+  <div class="complete-bar">
+    <button class="complete-workout-btn" onclick="completeWorkout()">✓ WORKOUT COMPLETE</button>
+  </div>
+</div>
+
+<!-- ═══════════════ REVIEW ═══════════════ -->
+<div id="page-review" class="page">
+  <div class="review-header">
+    <div>
+      <div class="review-title">SESSION LOGGED</div>
+      <div class="review-date" id="review-date"></div>
+    </div>
+  </div>
+  <div id="review-content"></div>
+  <div class="export-bar">
+    <button class="export-btn" onclick="showPage('welcome')">← Home</button>
+    <button class="export-btn" onclick="showPage('records')">🏆 PRs</button>
+    <button class="export-btn primary" onclick="exportToCSV()">⬇ Export CSV</button>
+  </div>
+</div>
+
+<!-- ═══════════════ HISTORY ═══════════════ -->
+<div id="page-history" class="page">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:20px 16px 0;">
+    <button class="back-btn" onclick="showPage('welcome')" style="font-size:15px;">←</button>
+    <div class="history-title" id="history-title">HISTORY</div>
+  </div>
+  <div style="padding:0 16px 80px;" id="history-content"></div>
+</div>
+
+<!-- ═══════════════ RECORDS ═══════════════ -->
+<div id="page-records" class="page">
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;padding:20px 16px 0;">
+    <button class="back-btn" onclick="showPage('welcome')" style="font-size:15px;">←</button>
+    <div class="history-title" id="records-title">PRs</div>
+  </div>
+  <div style="padding:0 16px 80px;" id="records-content"></div>
+</div>
+
+<!-- ═══════════════ PR BANNER ═══════════════ -->
+<div id="pr-banner" style="
+  display:none; position:fixed; top:0; left:50%; transform:translateX(-50%);
+  width:100%; max-width:480px; z-index:999;
+  padding:18px 24px; text-align:center;
+  background:linear-gradient(135deg, #FFD600, #FF6B35);
+  box-shadow:0 4px 30px rgba(255,214,0,0.4);
+  font-family:'Barlow Condensed',sans-serif;
+  font-size:26px; font-weight:800; letter-spacing:0.04em; color:#000;
+">
+  <div id="pr-banner-text">🏆 NEW PR!</div>
+  <div id="pr-banner-sub" style="font-size:14px;font-weight:600;margin-top:2px;opacity:0.75;"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// EXERCISES — grouped by muscle
+// ═══════════════════════════════════════════════════════════════
+const EXERCISE_GROUPS = {
+  torso: [
+    { name:'Chest', color:'#E8505B', exercises:["Arsenal Incline Chest Press","Pec Deck","Pec Deck (Single Arm)","Low to High Cable Fly (Single Arm)"] },
+    { name:'Delts', color:'#F4A261', exercises:["Behind The Neck Press (Smith)","Lateral Raise Machine","Cable Laterals (Single Arm)","Upright Rows (Smith)","Shoulder Press Machine","Iso Row Machine - Elbows up (Single Arm)"] },
+    { name:'Traps', color:'#FFD600', exercises:["Shrugs (Smith)","Kelso Shrug on T-Bar Row","Kelso Shrug on Row Machine"] },
+    { name:'Lats',  color:'#4A90FF', exercises:["Row Machine","Iso Row Machine - Elbows tucked (Single Arm)","Lat Pulldown","Hammer Strength Pullover"] },
+    { name:'Other', color:'#666',    exercises:["Other"] },
+  ],
+  limbs: [
+    { name:'Glutes',     color:'#E8505B', exercises:["Barbell Back Squat","Leg Press (High feet - glute focus)","Hip Thrust","Smith RDL","Good Mornings"] },
+    { name:'Quads',      color:'#4A90FF', exercises:["Barbell Front Squat","Hack Squat","Pendulum Squat","Leg Extensions (Single leg)","Leg Extensions","Bulgarian Split Squats (Barbell)"] },
+    { name:'Hamstrings', color:'#36d67b', exercises:["Hamstring Curl (seated) (Single leg)","Hamstring Curl (prone)"] },
+    { name:'Biceps',     color:'#C77DFF', exercises:["Preacher Curl (plate loaded)","Preacher Curl (machine)","Dumbbell Alternating Curls"] },
+    { name:'Triceps',    color:'#F4A261', exercises:["Tricep Pushdown","Tricep Pushdown (Single Arm)","Neutral Grip Tricep Press on Incline Machine"] },
+    { name:'Other',      color:'#666',    exercises:["Other"] },
+  ],
+  home: [],
+};
+
+function allExercisesFlat(type) {
+  return (EXERCISE_GROUPS[type] || []).flatMap(g => g.exercises);
+}
+
+function isBilateral(name) {
+  const n = name.toLowerCase();
+  return n.includes("single arm") || n.includes("single leg") || n.includes("(single");
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HISTORICAL DATA — SIMON
+// ═══════════════════════════════════════════════════════════════
+const SIMON_HISTORY = [
+  // ── 1st Feb — Limbs ──
+  {
+    id: 1706745600000,
+    user: 'simon',
+    type: 'limbs',
+    date: '2025-02-01T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Barbell Back Squat": [
+        { weight: '160', reps: '3', rir: '0', notes: '' },
+        { weight: '160', reps: '3', rir: '0', notes: '' },
+        { weight: '140', reps: '4', rir: '1', notes: '' },
+      ],
+      "Good Mornings": [
+        { weight: '100', reps: '6', rir: '0', notes: 'Safety bar GMs. Point toes every rep' },
+        { weight: '100', reps: '6', rir: '0', notes: '' },
+        { weight: '100', reps: '6', rir: '0', notes: '' },
+      ],
+      "Tricep Pushdown": [
+        { weight: '50', reps: '8', rir: '0', notes: '1 plate + 10kg' },
+        { weight: '50', reps: '8', rir: '0', notes: '' },
+        { weight: '50', reps: '8', rir: '0', notes: '' },
+      ],
+      "Dumbbell Alternating Curls": [
+        { weight: '20', reps: '8', rir: '0', notes: 'DB Hammer curls' },
+        { weight: '20', reps: '9', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 3rd Feb — Limbs ──
+  {
+    id: 1706918400000,
+    user: 'simon',
+    type: 'limbs',
+    date: '2025-02-03T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Smith RDL": [
+        { weight: '140', reps: '8', rir: '0', notes: 'Point toes every rep' },
+        { weight: '140', reps: '8', rir: '0', notes: '' },
+        { weight: '140', reps: '8', rir: '0', notes: '' },
+      ],
+      "Leg Extensions": [
+        { weight: '100', reps: '8', rir: '0', notes: 'Full stack' },
+        { weight: '100', reps: '7', rir: '0', notes: '' },
+        { weight: '100', reps: '6', rir: '0', notes: '' },
+      ],
+      "Preacher Curl (plate loaded)": [
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+      ],
+      "Tricep Pushdown": [
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 5th Feb — Torso ──
+  {
+    id: 1739091600000,
+    user: 'simon',
+    type: 'torso',
+    date: '2025-02-05T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Shoulder Press Machine": [
+        { weight: '60', reps: '8', rir: '1', notes: '2 plates + 8kg per side' },
+        { weight: '60', reps: '6', rir: '0', notes: '' },
+        { weight: '60', reps: '6', rir: '0', notes: 'F — failure' },
+      ],
+      "Lat Pulldown": [
+        { weight: '80', reps: '8', rir: '0', notes: '' },
+        { weight: '90', reps: '5', rir: '0', notes: '' },
+        { weight: '90', reps: '3', rir: '0', notes: '' },
+      ],
+      "Hammer Strength Pullover": [
+        { weight: '120', reps: '6', rir: '0', notes: '6 plates per side' },
+        { weight: '120', reps: '4', rir: '0', notes: '' },
+      ],
+      "Pec Deck": [
+        { weight: '88', reps: '8', rir: '0', notes: 'Injury noted' },
+        { weight: '88', reps: '8', rir: '0', notes: '' },
+        { weight: '88', reps: '5', rir: '0', notes: '' },
+      ],
+      "Row Machine": [
+        { weight: '61', reps: '8', rir: '0', notes: 'High elbow row — no load warm up' },
+      ],
+    }
+  },
+  // ── 14th Feb — Limbs (after illness) ──
+  {
+    id: 1739523600000,
+    user: 'simon',
+    type: 'limbs',
+    date: '2025-02-14T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Leg Extensions": [
+        { weight: '100', reps: '7', rir: '1', notes: 'Full stack. Long lay-off / sickness' },
+        { weight: '100', reps: '7', rir: '0', notes: '' },
+      ],
+      "Smith RDL": [
+        { weight: '150', reps: '6', rir: '0', notes: '' },
+        { weight: '140', reps: '6', rir: '1', notes: '' },
+        { weight: '140', reps: '8', rir: '1', notes: '' },
+      ],
+      "Hamstring Curl (prone)": [
+        { weight: '74', reps: '6', rir: '1', notes: '' },
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+        { weight: '74', reps: '5', rir: '0', notes: '' },
+      ],
+      "Preacher Curl (plate loaded)": [
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+      ],
+      "Tricep Extension (machine)": [
+        { weight: '74', reps: '6', rir: '1', notes: '' },
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+        { weight: '74', reps: '6', rir: '1', notes: '' },
+      ],
+    }
+  },
+  // ── 20th Feb — Torso ──
+  {
+    id: 1740042000000,
+    user: 'simon',
+    type: 'torso',
+    date: '2025-02-20T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Iso Row Machine - Elbows up (Single Arm)": [
+        { weight: '120', leftReps: '8', rightReps: '8', rir: '1', notes: 'Elbow up unilateral row near delt' },
+        { weight: '80', leftReps: '8', rightReps: '8', rir: '1', notes: '' },
+      ],
+      "Pec Deck (Single Arm)": [
+        { weight: '103', leftReps: '8', rightReps: '7', rir: '0', notes: '' },
+        { weight: '110', leftReps: '7', rightReps: '7', rir: '0', notes: '' },
+        { weight: '110', leftReps: '8', rightReps: '7', rir: '0', notes: '' },
+      ],
+      "Lateral Raise Machine": [
+        { weight: '74', reps: '6', rir: '0', notes: '' },
+        { weight: '81', reps: '6', rir: '0', notes: '' },
+      ],
+      "Shrugs (Smith)": [
+        { weight: '81', reps: '3', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 22nd Feb — Limbs ──
+  {
+    id: 1740214800000,
+    user: 'simon',
+    type: 'limbs',
+    date: '2025-02-22T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Barbell Back Squat": [
+        { weight: '140', reps: '4', rir: '0', notes: '' },
+        { weight: '140', reps: '4', rir: '0', notes: '' },
+        { weight: '140', reps: '3', rir: '0', notes: '' },
+      ],
+      "Smith RDL": [
+        { weight: '140', reps: '3', rir: '1', notes: '' },
+        { weight: '140', reps: '4', rir: '0', notes: '' },
+        { weight: '140', reps: '4', rir: '0', notes: '' },
+      ],
+      "Hamstring Curl (prone)": [
+        { weight: '74', reps: '6', rir: '3', notes: '' },
+        { weight: '74', reps: '5', rir: '0', notes: '' },
+        { weight: '74', reps: '5', rir: '1', notes: '' },
+      ],
+      "Preacher Curl (plate loaded)": [
+        { weight: '40', reps: '6', rir: '1', notes: '2 plates' },
+        { weight: '40', reps: '6', rir: '0', notes: '' },
+        { weight: '40', reps: '6', rir: '1', notes: '' },
+      ],
+      "Tricep Pushdown": [
+        { weight: '50', reps: '5', rir: '0', notes: 'Long extension pushdown — last bit only' },
+      ],
+    }
+  },
+  // ── 27th Feb — Torso ──
+  {
+    id: 1740646800000,
+    user: 'simon',
+    type: 'torso',
+    date: '2025-02-27T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Iso Row Machine - Elbows up (Single Arm)": [
+        { weight: '100', leftReps: '7', rightReps: '7', rir: '1', notes: 'Trap-focused row high elbow' },
+        { weight: '100', leftReps: '7', rightReps: '5', rir: '1', notes: '' },
+        { weight: '100', leftReps: '6', rightReps: '7', rir: '1', notes: '' },
+      ],
+      "Shrugs (Smith)": [
+        { weight: '130', reps: '6', rir: '1', notes: '' },
+        { weight: '140', reps: '6', rir: '0', notes: '' },
+        { weight: '150', reps: '5', rir: '0', notes: 'Some residual right shoulder pain' },
+      ],
+      "Low to High Cable Fly (Single Arm)": [
+        { weight: '30', leftReps: '7', rightReps: '7', rir: '0', notes: '' },
+      ],
+      "Lat Pulldown": [
+        { weight: '110', reps: '7', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 2nd March — Limbs ──
+  {
+    id: 1740906000000,
+    user: 'simon',
+    type: 'limbs',
+    date: '2025-03-02T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Leg Press (High feet - glute focus)": [
+        { weight: '100', reps: '8', rir: '1', notes: '5 plates per side' },
+        { weight: '100', reps: '8', rir: '1', notes: '' },
+        { weight: '100', reps: '8', rir: '1', notes: '' },
+      ],
+      "Smith RDL": [
+        { weight: '150', reps: '6', rir: '0', notes: '' },
+        { weight: '150', reps: '5', rir: '0', notes: '' },
+      ],
+      "Hamstring Curl (seated) (Single leg)": [
+        { weight: '34', leftReps: '7', rightReps: '7', rir: '0', notes: '' },
+        { weight: '34.5', leftReps: '6', rightReps: '3', rir: '0', notes: 'Right — pain deep weight' },
+        { weight: '40', leftReps: '8', rightReps: '8', rir: '0', notes: '' },
+      ],
+      "Preacher Curl (plate loaded)": [
+        { weight: '34.5', leftReps: '7', rightReps: '7', rir: '0', notes: '' },
+        { weight: '34.5', leftReps: '6', rightReps: '3', rir: '0', notes: 'Right pain — deep weight' },
+        { weight: '40', leftReps: '8', rightReps: '8', rir: '0', notes: '' },
+      ],
+      "Tricep Pushdown": [
+        { weight: '40', reps: '6', rir: '0', notes: '' },
+        { weight: '40', reps: '6', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 6th March — Torso ──
+  {
+    id: 1741251600000,
+    user: 'simon',
+    type: 'torso',
+    date: '2025-03-06T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Iso Row Machine - Elbows up (Single Arm)": [
+        { weight: '80', leftReps: '8', rightReps: '9', rir: '1', notes: 'Diag trap row high elbow single arm' },
+        { weight: '85', leftReps: '7', rightReps: '7', rir: '1', notes: '' },
+        { weight: '85', leftReps: '7', rightReps: '7', rir: '1', notes: '' },
+      ],
+      "Upright Rows (Smith)": [
+        { weight: '60', reps: '6', rir: '0', notes: 'Very sore right — Smith upright row' },
+        { weight: '60', reps: '6', rir: '0', notes: '' },
+      ],
+      "Arsenal Incline Chest Press": [
+        { weight: '40', reps: '6', rir: '0', notes: '2 plates per side' },
+        { weight: '40', reps: '6', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 7th March — Limbs ──
+  {
+    id: 1741338000000,
+    user: 'simon',
+    type: 'limbs',
+    date: '2025-03-07T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Bulgarian Split Squats (Barbell)": [
+        { weight: '60', reps: '5', rir: '0', notes: '3 plates' },
+        { weight: '60', reps: '4', rir: '0', notes: '' },
+        { weight: '60', reps: '4', rir: '0', notes: '' },
+      ],
+      "Leg Extensions (Single leg)": [
+        { weight: '52', leftReps: '3', rightReps: '8', rir: '0', notes: '' },
+        { weight: '52', leftReps: '5', rightReps: '6', rir: '0', notes: '' },
+        { weight: '57', leftReps: '5', rightReps: '8', rir: '0', notes: '+5kg' },
+      ],
+      "Hamstring Curl (seated) (Single leg)": [
+        { weight: '103', reps: '6', rir: '0', notes: 'Hip too tight — cut short' },
+      ],
+    }
+  },
+  // ── 10th March — Torso ──
+  {
+    id: 1741597200000,
+    user: 'simon',
+    type: 'torso',
+    date: '2025-03-10T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Shrugs (Smith)": [
+        { weight: '115', reps: '6', rir: '0', notes: '3 plates + 15kg' },
+        { weight: '115', reps: '5', rir: '0', notes: '' },
+        { weight: '115', reps: '3', rir: '0', notes: '' },
+      ],
+      "Upright Rows (Smith)": [
+        { weight: '103', reps: '8', rir: '1', notes: 'Smith high pull upright row. 2kg + 16 warm up' },
+        { weight: '103', reps: '7', rir: '0', notes: '' },
+      ],
+      "Kelso Shrug on Row Machine": [
+        { weight: '103', reps: '7', rir: '0', notes: 'Kelso iso machine' },
+        { weight: '103', reps: '10', rir: '0', notes: '' },
+      ],
+      "Arsenal Incline Chest Press": [
+        { weight: '40', reps: '6', rir: '0', notes: '2 plates — new machine' },
+        { weight: '40', reps: '6', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 13th March — Limbs ──
+  {
+    id: 1741856400000,
+    user: 'simon',
+    type: 'limbs',
+    date: '2025-03-13T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Barbell Back Squat": [
+        { weight: '140', reps: '6', rir: '1', notes: '' },
+        { weight: '150', reps: '3', rir: '0', notes: '' },
+        { weight: '150', reps: '3', rir: '0', notes: '' },
+        { weight: '150', reps: '3', rir: '0', notes: 'On elbow' },
+      ],
+      "Smith RDL": [
+        { weight: '150', reps: '5', rir: '0', notes: '' },
+        { weight: '150', reps: '5', rir: '0', notes: '' },
+        { weight: '150', reps: '3', rir: '0', notes: '' },
+      ],
+      "Hamstring Curl (seated) (Single leg)": [
+        { weight: '40', leftReps: '8', rightReps: '8', rir: '0', notes: '' },
+        { weight: '54', leftReps: '6', rightReps: '6', rir: '0', notes: '' },
+      ],
+      "Tricep Extension (machine)": [
+        { weight: '74', reps: '8', rir: '1', notes: '' },
+        { weight: '76.5', reps: '6', rir: '0', notes: '+2.5kg microplate' },
+        { weight: '76.5', reps: '6', rir: '0', notes: '' },
+      ],
+      "Dumbbell Alternating Curls": [
+        { weight: '20', reps: '7', rir: '0', notes: '' },
+        { weight: '20', reps: '3', rir: '0', notes: '' },
+        { weight: '20', reps: '6', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 14th March — Torso ──
+  {
+    id: 1741942800000,
+    user: 'simon',
+    type: 'torso',
+    date: '2025-03-14T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Pec Deck": [
+        { weight: '85', reps: '8', rir: '1', notes: 'Straight arm focus' },
+        { weight: '90', reps: '7', rir: '0', notes: '' },
+        { weight: '90', reps: '7', rir: '0', notes: '' },
+      ],
+      "Shrugs (Smith)": [
+        { weight: '80', reps: '5', rir: '0', notes: '4 plates' },
+        { weight: '80', reps: '6', rir: '0', notes: '' },
+        { weight: '60', reps: '8', rir: '1', notes: '3 plates' },
+      ],
+      "Upright Rows (Smith)": [
+        { weight: '40', reps: '6', rir: '0', notes: '2 plates. Snatch grip' },
+        { weight: '40', reps: '7', rir: '0', notes: '' },
+        { weight: '40', reps: '7', rir: '0', notes: '' },
+      ],
+      "Behind The Neck Press (Smith)": [
+        { weight: '20', reps: '6', rir: '6', notes: '1 plate. Rebuild — weaker. Good depth' },
+        { weight: '20', reps: '6', rir: '1', notes: 'Bit more depth, more discomfort' },
+        { weight: '20', reps: '6', rir: '0', notes: 'Good depth, minimal pain' },
+      ],
+      "Lat Pulldown": [
+        { weight: '100', reps: '6', rir: '0', notes: 'Wide grip attachment' },
+        { weight: '100', reps: '6', rir: '0', notes: '' },
+      ],
+      "Iso Row Machine - Elbows up (Single Arm)": [
+        { weight: '100', leftReps: '7', rightReps: '5', rir: '0', notes: 'Plate loaded iso row elbow up focus' },
+        { weight: '100', leftReps: '7', rightReps: '5', rir: '0', notes: '' },
+        { weight: '80', leftReps: '6', rightReps: '8', rir: '0', notes: '4 plates' },
+        { weight: '80', leftReps: '8', rightReps: '8', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 20th March — Torso ──
+  {
+    id: 1742461200000,
+    user: 'simon',
+    type: 'torso',
+    date: '2025-03-20T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Iso Row Machine - Elbows up (Single Arm)": [
+        { weight: '80', leftReps: '3', rightReps: '3', rir: '1', notes: 'Deep weight, high elbow' },
+        { weight: '80', leftReps: '3', rightReps: '3', rir: '1', notes: '' },
+        { weight: '80', leftReps: '3', rightReps: '3', rir: '1', notes: '' },
+      ],
+      "Lat Pulldown": [
+        { weight: '100', reps: '6', rir: '1', notes: '' },
+        { weight: '100', reps: '6', rir: '0', notes: '' },
+      ],
+      "Pec Deck (Single Arm)": [
+        { weight: '165', leftReps: '8', rightReps: '8', rir: '0', notes: 'Single arm close grip' },
+        { weight: '165', leftReps: '8', rightReps: '8', rir: '0', notes: '' },
+        { weight: '163', leftReps: '6', rightReps: '6', rir: '0', notes: '' },
+      ],
+      "Shrugs (Smith)": [
+        { weight: '60', reps: '8', rir: '0', notes: '3 plates' },
+        { weight: '80', reps: '7', rir: '0', notes: '4 plates — good room' },
+        { weight: '80', reps: '7', rir: '0', notes: '' },
+      ],
+      "Behind The Neck Press (Smith)": [
+        { weight: '60', reps: '7', rir: '0', notes: 'Injury rebuild' },
+        { weight: '60', reps: '6', rir: '0', notes: '' },
+        { weight: '60', reps: '6', rir: '0', notes: '' },
+      ],
+    }
+  },
+  // ── 22nd March — Limbs ──
+  {
+    id: 1742634000000,
+    user: 'simon',
+    type: 'limbs',
+    date: '2025-03-22T10:00:00.000Z',
+    duration: 0,
+    exercises: {
+      "Barbell Back Squat": [
+        { weight: '140', reps: '6', rir: '0', notes: '' },
+        { weight: '150', reps: '6', rir: '0', notes: '' },
+        { weight: '150', reps: '3', rir: '0', notes: '' },
+      ],
+      "Smith RDL": [
+        { weight: '150', reps: '6', rir: '0', notes: '' },
+        { weight: '150', reps: '5', rir: '0', notes: '' },
+        { weight: '150', reps: '3', rir: '0', notes: '' },
+      ],
+      "Leg Extensions (Single leg)": [
+        { weight: '52', leftReps: '7', rightReps: '7', rir: '0', notes: '' },
+        { weight: '52', leftReps: '7', rightReps: '7', rir: '0', notes: '' },
+        { weight: '54', leftReps: '4', rightReps: '4', rir: '0', notes: '' },
+      ],
+      "Tricep Pushdown": [
+        { weight: '40', reps: '6', rir: '0', notes: '' },
+        { weight: '40', reps: '6', rir: '0', notes: '' },
+      ],
+      "Preacher Curl (plate loaded)": [
+        { weight: '40', reps: '7', rir: '1', notes: '' },
+      ],
+    }
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let currentUser = null;
+let currentWorkout = { type: null, date: null, startTime: null, exercises: {} };
+let timerInterval = null;
+
+function storageKey(user) { return `liftlog_v2_${user}`; }
+
+function loadHistory(user) {
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey(user)) || '[]');
+    if (user === 'simon') {
+      // Merge: saved sessions take priority, seed historical if not already present
+      const savedIds = new Set(saved.map(s => s.id));
+      const seeded = SIMON_HISTORY.filter(s => !savedIds.has(s.id));
+      return [...saved, ...seeded].sort((a, b) => new Date(b.date) - new Date(a.date));
+    }
+    return saved;
+  } catch { return user === 'simon' ? [...SIMON_HISTORY] : []; }
+}
+
+function saveHistory(user, history) {
+  // Only save non-seeded + new sessions to localStorage
+  const toSave = history.filter(s => s.user === user && !SIMON_HISTORY.find(h => h.id === s.id && h.user === 'simon'));
+  try { localStorage.setItem(storageKey(user), JSON.stringify(toSave)); } catch {}
+}
+
+// ═══════════════════════════════════════════════════════════════
+// USER SELECT
+// ═══════════════════════════════════════════════════════════════
+function selectUser(user) {
+  currentUser = user;
+  document.getElementById('user-pill-name').textContent = user.toUpperCase();
+  document.getElementById('welcome-sub').textContent = user === 'simon' ? "Simon's Log" : "Joe's Log";
+  showPage('welcome');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RECORDS PAGE
+// ═══════════════════════════════════════════════════════════════
+function renderRecords() {
+  const user = currentUser;
+  const prs = loadPRs(user);
+  const prLog = loadPRLog(user);
+  document.getElementById('records-title').textContent = (user || '').toUpperCase() + ' — PRs';
+  const content = document.getElementById('records-content');
+  content.innerHTML = '';
+
+  // ── Best Ever per exercise ──
+  const bestSection = document.createElement('div');
+  bestSection.innerHTML = `<div class="section-label" style="padding:0 0 10px;">Best Ever Lifts</div>`;
+
+  const exNames = Object.keys(prs).sort();
+  if (!exNames.length) {
+    bestSection.innerHTML += `<div class="empty-history">No PRs recorded yet.<br>Complete a session to start tracking.</div>`;
+  } else {
+    exNames.forEach(exName => {
+      const ex = prs[exName];
+      if (!ex || !ex.bestWeight) return;
+      const bestRepsAtBest = ex.bestReps?.[ex.bestWeight] || '—';
+      const card = document.createElement('div');
+      card.className = 'pr-entry';
+      card.innerHTML = `
+        <div class="pr-entry-left">
+          <div class="pr-entry-ex">${exName}</div>
+          <div class="pr-entry-detail">Best reps at top weight: ${bestRepsAtBest}</div>
+        </div>
+        <div class="pr-entry-right">
+          <div class="pr-entry-value">${ex.bestWeight}kg</div>
+          <div class="pr-entry-type">Best ever</div>
+        </div>`;
+      bestSection.appendChild(card);
+    });
+  }
+  content.appendChild(bestSection);
+
+  // ── PR Timeline ──
+  if (prLog.length > 0) {
+    const timelineSection = document.createElement('div');
+    timelineSection.style.marginTop = '24px';
+    timelineSection.innerHTML = `<div class="section-label" style="padding:0 0 10px;">PR Timeline</div>`;
+
+    let lastDate = '';
+    prLog.forEach(entry => {
+      const dateStr = formatDate(new Date(entry.date));
+      if (dateStr !== lastDate) {
+        const dh = document.createElement('div');
+        dh.className = 'pr-date-header';
+        dh.textContent = dateStr;
+        timelineSection.appendChild(dh);
+        lastDate = dateStr;
+      }
+      const typeLabel = entry.type === 'both' ? 'Weight & Rep PR' : entry.type === 'weight' ? 'Weight PR' : 'Rep PR';
+      const card = document.createElement('div');
+      card.className = 'pr-entry';
+      card.innerHTML = `
+        <div class="pr-entry-left">
+          <div class="pr-entry-ex">${entry.exercise}</div>
+          <div class="pr-entry-detail">${entry.weight}kg × ${entry.reps} reps</div>
+        </div>
+        <div class="pr-entry-right">
+          <div class="pr-entry-value" style="font-size:14px;color:var(--green);">${typeLabel}</div>
+        </div>`;
+      timelineSection.appendChild(card);
+    });
+    content.appendChild(timelineSection);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = '';
+  });
+  if (id === 'lastweek') {
+    renderHistory(true);
+    id = 'history';
+  }
+  const pg = document.getElementById('page-' + id);
+  if (!pg) return;
+  pg.classList.add('active');
+  if (id === 'userselect') pg.style.display = 'flex';
+  if (id === 'welcome') pg.style.display = 'flex';
+  if (id === 'history') renderHistory();
+  if (id === 'records') { seedPRsFromHistory(currentUser); renderRecords(); }
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// START WORKOUT
+// ═══════════════════════════════════════════════════════════════
+function startWorkout(type) {
+  currentWorkout = { type, date: new Date(), startTime: Date.now(), exercises: {} };
+  renderWorkoutPage(type);
+  showPage('workout');
+  startTimer();
+}
+
+function renderWorkoutPage(type) {
+  const badge = document.getElementById('workout-badge');
+  badge.textContent = type === 'torso' ? 'TORSO' : type === 'limbs' ? 'LIMBS' : 'HOME';
+  badge.className = 'workout-type-badge badge-' + type;
+  document.getElementById('workout-date').textContent =
+    formatDate(currentWorkout.date) + '  ·  ' + (currentUser || '').toUpperCase();
+  const list = document.getElementById('exercise-list');
+  list.innerHTML = '';
+  if (type === 'home') {
+    list.innerHTML = `<div class="coming-soon"><h2>HOME WORKOUT</h2><p>Exercise list coming soon.</p></div>`;
+    return;
+  }
+  const groups = EXERCISE_GROUPS[type] || [];
+  groups.forEach(group => {
+    const groupWrap = document.createElement('div');
+    groupWrap.className = 'muscle-group';
+    groupWrap.dataset.group = group.name;
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'muscle-group-header';
+    hdr.style.setProperty('--group-color', group.color);
+    hdr.innerHTML = `
+      <span class="muscle-group-name">${group.name}</span>
+      <span class="muscle-group-tick" id="grouptick-${safeId(group.name)}">✓</span>`;
+    groupWrap.appendChild(hdr);
+    // Exercises
+    group.exercises.forEach(name => groupWrap.appendChild(buildExerciseRow(name, group.color)));
+    list.appendChild(groupWrap);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXERCISE ROW
+// ═══════════════════════════════════════════════════════════════
+function buildExerciseRow(name, groupColor) {
+  const isOther = name === 'Other';
+  const bilateral = isBilateral(name);
+  const row = document.createElement('div');
+  row.className = 'exercise-row';
+  row.dataset.name = name;
+  if (groupColor) row.dataset.groupColor = groupColor;
+  const header = document.createElement('div');
+  header.className = 'exercise-header';
+  header.innerHTML = `
+    <span class="exercise-name">${name}</span>
+    <span class="ex-set-count" id="setcount-${safeId(name)}"></span>
+    <span class="ex-chevron">▾</span>`;
+  header.onclick = () => toggleExercise(row, name, bilateral, isOther);
+  row.appendChild(header);
+  const panel = document.createElement('div');
+  panel.className = 'sets-panel';
+  panel.id = 'panel-' + safeId(name);
+  row.appendChild(panel);
+  return row;
+}
+
+function toggleExercise(row, name, bilateral, isOther) {
+  const isOpen = row.classList.contains('open');
+  document.querySelectorAll('.exercise-row.open').forEach(r => r.classList.remove('open'));
+  if (!isOpen) { row.classList.add('open'); renderSetsPanel(name, bilateral, isOther); }
+}
+
+function renderSetsPanel(name, bilateral, isOther) {
+  const panel = document.getElementById('panel-' + safeId(name));
+  panel.innerHTML = '';
+  if (isOther) {
+    const wrap = document.createElement('div');
+    wrap.className = 'other-input-wrap';
+    const inp = document.createElement('input');
+    inp.className = 'other-name-input';
+    inp.placeholder = 'Enter exercise name…';
+    const btn = document.createElement('button');
+    btn.className = 'confirm-other-btn';
+    btn.textContent = 'Use this name';
+    btn.onclick = () => {
+      const n = inp.value.trim();
+      if (!n) return;
+      if (!currentWorkout.exercises[n]) currentWorkout.exercises[n] = [];
+      renderSetsPanel_named(n, isBilateral(n), panel);
+    };
+    wrap.appendChild(inp); wrap.appendChild(document.createElement('br')); wrap.appendChild(btn);
+    panel.appendChild(wrap);
+    return;
+  }
+  if (!currentWorkout.exercises[name]) currentWorkout.exercises[name] = [];
+  renderSetsPanel_named(name, bilateral, panel);
+}
+
+function renderSetsPanel_named(name, bilateral, panel) {
+  panel.innerHTML = '';
+  if (!currentWorkout.exercises[name]) currentWorkout.exercises[name] = [];
+  const sets = currentWorkout.exercises[name];
+  sets.forEach((set, i) => panel.appendChild(buildSetEntry(name, i, bilateral)));
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-set-btn';
+  addBtn.textContent = `+ Add Set ${sets.length + 1}`;
+  addBtn.onclick = () => {
+    currentWorkout.exercises[name].push({ weight: '', reps: '', leftReps: '', rightReps: '', rir: '', notes: '' });
+    renderSetsPanel_named(name, bilateral, panel);
+    updateSetCount(name);
+    setTimeout(() => panel.lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+  };
+  panel.appendChild(addBtn);
+}
+
+function buildSetEntry(name, index, bilateral) {
+  const set = currentWorkout.exercises[name][index];
+  const wrap = document.createElement('div');
+  wrap.className = 'set-entry';
+  wrap.innerHTML = `<div class="set-label">SET ${index + 1}</div>`;
+  const fields = document.createElement('div');
+  fields.className = bilateral ? 'set-fields bilateral' : 'set-fields';
+  if (bilateral) {
+    fields.innerHTML = `
+      <div class="field-group"><div class="field-label">Weight (kg)</div><input class="field-input" type="number" inputmode="decimal" placeholder="e.g. 80" value="${set.weight}" data-field="weight"></div>
+      <div class="field-group"><div class="field-label">Left Reps</div><input class="field-input" type="number" inputmode="numeric" placeholder="reps" value="${set.leftReps}" data-field="leftReps"></div>
+      <div class="field-group"><div class="field-label">Right Reps</div><input class="field-input" type="number" inputmode="numeric" placeholder="reps" value="${set.rightReps}" data-field="rightReps"></div>`;
+  } else {
+    fields.innerHTML = `
+      <div class="field-group"><div class="field-label">Weight (kg)</div><input class="field-input" type="number" inputmode="decimal" placeholder="e.g. 80" value="${set.weight}" data-field="weight"></div>
+      <div class="field-group"><div class="field-label">Reps</div><input class="field-input" type="number" inputmode="numeric" placeholder="reps" value="${set.reps}" data-field="reps"></div>`;
+  }
+  const rir = document.createElement('div');
+  rir.className = 'set-fields';
+  rir.innerHTML = `
+    <div class="field-group"><div class="field-label">RIR</div><input class="field-input" type="number" inputmode="numeric" placeholder="0–5" value="${set.rir}" data-field="rir"></div>
+    <div class="field-group"><div class="field-label">Notes</div><input class="field-input notes" type="text" placeholder="Optional…" value="${set.notes}" data-field="notes"></div>`;
+  wrap.appendChild(fields);
+  wrap.appendChild(rir);
+  const preview = document.createElement('div');
+  preview.className = 'set-preview';
+  preview.id = `preview-${safeId(name)}-${index}`;
+  wrap.appendChild(preview);
+  updatePreview(name, index, bilateral);
+  const actions = document.createElement('div');
+  actions.className = 'set-row-actions';
+  const removeBtn = document.createElement('button');
+  removeBtn.className = 'remove-set-btn';
+  removeBtn.textContent = 'Remove set';
+  removeBtn.onclick = () => {
+    currentWorkout.exercises[name].splice(index, 1);
+    const panel = document.getElementById('panel-' + safeId(name));
+    renderSetsPanel_named(name, bilateral, panel);
+    updateSetCount(name);
+  };
+  actions.appendChild(removeBtn);
+  wrap.appendChild(actions);
+  wrap.querySelectorAll('.field-input').forEach(inp => {
+    inp.addEventListener('input', () => {
+      currentWorkout.exercises[name][index][inp.dataset.field] = inp.value;
+      updatePreview(name, index, bilateral);
+      updateSetCount(name);
+    });
+  });
+  return wrap;
+}
+
+function updatePreview(name, index, bilateral) {
+  const el = document.getElementById(`preview-${safeId(name)}-${index}`);
+  if (!el) return;
+  const set = currentWorkout.exercises[name]?.[index];
+  if (!set) return;
+  let line = `[Set ${index + 1}] [${set.weight || '?'}kg] × `;
+  if (bilateral) line += `[Left: ${set.leftReps || '?'} reps] [Right: ${set.rightReps || '?'} reps]`;
+  else line += `[${set.reps || '?'} reps]`;
+  if (set.rir !== '') line += ` [${set.rir} RIR]`;
+  if (set.notes) line += ` [Notes: ${set.notes}]`;
+  el.textContent = line;
+}
+
+function updateSetCount(name) {
+  const el = document.getElementById('setcount-' + safeId(name));
+  if (!el) return;
+  const sets = currentWorkout.exercises[name];
+  const hasSets = sets && sets.length > 0;
+  if (hasSets) {
+    el.textContent = sets.length + ' set' + (sets.length > 1 ? 's' : '');
+    el.closest('.exercise-row')?.classList.add('has-sets');
+  } else {
+    el.textContent = '';
+    el.closest('.exercise-row')?.classList.remove('has-sets');
+  }
+  // Update group tick — find which group this exercise belongs to
+  const type = currentWorkout.type;
+  const groups = EXERCISE_GROUPS[type] || [];
+  const group = groups.find(g => g.exercises.includes(name));
+  if (!group) return;
+  const tickEl = document.getElementById('grouptick-' + safeId(group.name));
+  if (!tickEl) return;
+  const groupHasSets = group.exercises.some(exName => {
+    const s = currentWorkout.exercises[exName];
+    return s && s.length > 0;
+  });
+  tickEl.classList.toggle('done', groupHasSets);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PR STORAGE
+// ═══════════════════════════════════════════════════════════════
+// PRs stored as: { exName: { bestWeight: n, bestReps: { [weight]: n } } }
+// PR log stored as: [ { date, exercise, type:'weight'|'reps'|'both', weight, reps, side? } ]
+
+function prKey(user) { return `liftlog_pr_${user}`; }
+function prLogKey(user) { return `liftlog_prlog_${user}`; }
+
+function loadPRs(user) {
+  try { return JSON.parse(localStorage.getItem(prKey(user)) || '{}'); } catch { return {}; }
+}
+function savePRs(user, prs) {
+  try { localStorage.setItem(prKey(user), JSON.stringify(prs)); } catch {}
+}
+function loadPRLog(user) {
+  try { return JSON.parse(localStorage.getItem(prLogKey(user)) || '[]'); } catch { return []; }
+}
+function savePRLog(user, log) {
+  try { localStorage.setItem(prLogKey(user), JSON.stringify(log)); } catch {}
+}
+
+// Seed PRs from Simon's historical data on first load
+function seedPRsFromHistory(user) {
+  if (user !== 'simon') return;
+  if (localStorage.getItem(prKey(user) + '_seeded')) return;
+  const prs = {};
+  const history = SIMON_HISTORY;
+  // Process oldest first so PRs build up correctly
+  const sorted = [...history].sort((a,b) => new Date(a.date) - new Date(b.date));
+  sorted.forEach(session => {
+    Object.entries(session.exercises || {}).forEach(([exName, sets]) => {
+      sets.forEach(set => {
+        const w = parseFloat(set.weight);
+        const r = parseInt(set.reps || set.leftReps || 0);
+        if (!w || !r) return;
+        if (!prs[exName]) prs[exName] = { bestWeight: 0, bestReps: {} };
+        if (w > prs[exName].bestWeight) prs[exName].bestWeight = w;
+        if (!prs[exName].bestReps[w] || r > prs[exName].bestReps[w]) prs[exName].bestReps[w] = r;
+      });
+    });
+  });
+  savePRs(user, prs);
+  localStorage.setItem(prKey(user) + '_seeded', '1');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PR DETECTION
+// ═══════════════════════════════════════════════════════════════
+function checkPRs(session) {
+  const user = session.user || currentUser;
+  const prs = loadPRs(user);
+  const prLog = loadPRLog(user);
+  const newPRs = []; // { exercise, type, weight, reps, display }
+
+  Object.entries(session.exercises || {}).forEach(([exName, sets]) => {
+    if (!prs[exName]) prs[exName] = { bestWeight: 0, bestReps: {} };
+    const exPR = prs[exName];
+
+    sets.forEach(set => {
+      const w = parseFloat(set.weight);
+      // For bilateral use max of left/right
+      const r = parseInt(set.reps || Math.max(parseInt(set.leftReps||0), parseInt(set.rightReps||0)));
+      if (!w || !r) return;
+
+      let isWeightPR = false, isRepPR = false;
+
+      // Weight PR — heavier than anything ever lifted on this exercise
+      if (w > (exPR.bestWeight || 0)) {
+        isWeightPR = true;
+        exPR.bestWeight = w;
+      }
+
+      // Rep PR — more reps at this specific weight than ever before
+      if (!exPR.bestReps[w] || r > exPR.bestReps[w]) {
+        isRepPR = true;
+        exPR.bestReps[w] = r;
+      }
+
+      if (isWeightPR || isRepPR) {
+        const type = (isWeightPR && isRepPR) ? 'both' : isWeightPR ? 'weight' : 'reps';
+        // Avoid duplicate PR entries for same exercise/weight/reps in same session
+        const alreadyLogged = newPRs.find(p => p.exercise === exName && p.weight === w && p.reps === r);
+        if (!alreadyLogged) {
+          newPRs.push({ exercise: exName, type, weight: w, reps: r });
+        }
+      }
+    });
+    prs[exName] = exPR;
+  });
+
+  if (newPRs.length > 0) {
+    // Persist updated PRs
+    savePRs(user, prs);
+    // Add to PR log
+    newPRs.forEach(pr => {
+      prLog.unshift({
+        date: session.date,
+        exercise: pr.exercise,
+        type: pr.type,
+        weight: pr.weight,
+        reps: pr.reps,
+      });
+    });
+    savePRLog(user, prLog);
+  }
+  return newPRs;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PR BANNER
+// ═══════════════════════════════════════════════════════════════
+let prBannerQueue = [];
+let prBannerShowing = false;
+
+function queuePRBanners(newPRs) {
+  newPRs.forEach(pr => prBannerQueue.push(pr));
+  if (!prBannerShowing) showNextPRBanner();
+}
+
+function showNextPRBanner() {
+  if (!prBannerQueue.length) { prBannerShowing = false; return; }
+  prBannerShowing = true;
+  const pr = prBannerQueue.shift();
+  const banner = document.getElementById('pr-banner');
+  const text = document.getElementById('pr-banner-text');
+  const sub = document.getElementById('pr-banner-sub');
+
+  if (pr.type === 'both') {
+    text.textContent = '🏆 New Weight & Rep PR!';
+  } else if (pr.type === 'weight') {
+    text.textContent = '🏋️ New Weight PR!';
+  } else {
+    text.textContent = '💪 New Rep PR!';
+  }
+  sub.textContent = `${pr.exercise} — ${pr.weight}kg × ${pr.reps} reps`;
+
+  banner.style.display = 'block';
+  banner.style.animation = 'none';
+  banner.offsetHeight; // reflow
+  banner.style.animation = 'prSlideIn 0.4s ease, prSlideOut 0.4s ease 2.6s forwards';
+
+  setTimeout(() => {
+    banner.style.display = 'none';
+    showNextPRBanner();
+  }, 3200);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// COMPLETE
+// ═══════════════════════════════════════════════════════════════
+function completeWorkout() {
+  stopTimer();
+  const history = loadHistory(currentUser);
+  const session = {
+    id: Date.now(),
+    user: currentUser,
+    type: currentWorkout.type,
+    date: currentWorkout.date.toISOString(),
+    duration: Math.round((Date.now() - currentWorkout.startTime) / 1000),
+    exercises: currentWorkout.exercises,
+  };
+  // Detect PRs before saving (so we compare against previous history)
+  const newPRs = checkPRs(session);
+  history.unshift(session);
+  saveHistory(currentUser, history);
+  renderReview(session, newPRs);
+  showPage('review');
+  // Show banners after brief delay so review page is visible
+  if (newPRs.length) setTimeout(() => queuePRBanners(newPRs), 600);
+}
+
+function renderReview(session, newPRs = []) {
+  document.getElementById('review-date').textContent =
+    formatDate(new Date(session.date)) + '  ·  ' + (session.type || '').toUpperCase() + '  ·  ' + formatDuration(session.duration || 0);
+  const content = document.getElementById('review-content');
+  content.innerHTML = '';
+  const entries = Object.entries(session.exercises).filter(([, sets]) => sets.length > 0);
+  if (!entries.length) { content.innerHTML = '<p style="color:var(--text-dim);padding:20px 0">No exercises logged.</p>'; return; }
+
+  // Build a quick lookup of PRs for this session
+  const prLookup = {};
+  newPRs.forEach(pr => { prLookup[`${pr.exercise}_${pr.weight}_${pr.reps}`] = pr.type; });
+
+  entries.forEach(([exName, sets]) => {
+    const bilateral = isBilateral(exName);
+    const block = document.createElement('div');
+    block.className = 'review-exercise';
+    block.innerHTML = `<div class="review-ex-name">${exName}</div>`;
+    sets.forEach((set, i) => {
+      const w = parseFloat(set.weight);
+      const r = parseInt(set.reps || Math.max(parseInt(set.leftReps||0), parseInt(set.rightReps||0)));
+      const prType = prLookup[`${exName}_${w}_${r}`];
+
+      let line = `[Set ${i + 1}] [${set.weight || '?'}kg] × `;
+      if (bilateral) line += `[Left: ${set.leftReps || '?'} reps] [Right: ${set.rightReps || '?'} reps]`;
+      else line += `[${set.reps || '?'} reps]`;
+      if (set.rir !== '') line += ` [${set.rir} RIR]`;
+      const setLine = document.createElement('div');
+      setLine.className = 'review-set-line';
+      setLine.textContent = line;
+      if (prType) {
+        const badge = document.createElement('span');
+        badge.className = 'pr-badge';
+        badge.textContent = prType === 'both' ? 'Weight & Rep PR' : prType === 'weight' ? 'Weight PR' : 'Rep PR';
+        setLine.appendChild(badge);
+      }
+      if (set.notes) { const ns = document.createElement('span'); ns.className = 'set-notes'; ns.textContent = ` — ${set.notes}`; setLine.appendChild(ns); }
+      block.appendChild(setLine);
+    });
+    content.appendChild(block);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HISTORY
+// ═══════════════════════════════════════════════════════════════
+function renderHistory(lastWeekOnly = false) {
+  const history = loadHistory(currentUser);
+  const titleEl = document.getElementById('history-title');
+  const content = document.getElementById('history-content');
+  content.innerHTML = '';
+
+  const now = new Date();
+  const sevenDaysAgo = new Date(now); sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+  let sessions = history;
+  if (lastWeekOnly) {
+    sessions = history.filter(s => new Date(s.date) >= sevenDaysAgo);
+    titleEl.textContent = 'LAST WEEK';
+  } else {
+    titleEl.textContent = (currentUser || '').toUpperCase() + ' — HISTORY';
+  }
+
+  if (!sessions.length) {
+    content.innerHTML = '<div class="empty-history">No sessions in this period.</div>';
+    return;
+  }
+
+  sessions.forEach(session => {
+    const entries = Object.entries(session.exercises || {}).filter(([, s]) => s.length > 0);
+    const sessionDate = new Date(session.date);
+    const isLastWeek = sessionDate >= sevenDaysAgo;
+    const block = document.createElement('div');
+    block.className = 'history-session';
+    const hdr = document.createElement('div');
+    hdr.className = 'history-session-header';
+    hdr.innerHTML = `
+      <div>
+        <div class="hs-date">${formatDate(sessionDate)}${isLastWeek && !lastWeekOnly ? '<span class="last-week-badge">this week</span>' : ''}</div>
+        <div class="hs-type">${(session.type || '').toUpperCase()} · ${formatDuration(session.duration || 0)}</div>
+      </div>
+      <div class="hs-count">${entries.length} exercise${entries.length !== 1 ? 's' : ''} ▾</div>`;
+    hdr.onclick = () => block.classList.toggle('open');
+    const body = document.createElement('div');
+    body.className = 'history-session-body';
+    entries.forEach(([exName, sets]) => {
+      const bilateral = isBilateral(exName);
+      const exDiv = document.createElement('div');
+      exDiv.style.cssText = 'margin-bottom:12px;padding-top:10px;';
+      exDiv.innerHTML = `<div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px;">${exName}</div>`;
+      sets.forEach((set, i) => {
+        let line = `[Set ${i + 1}] [${set.weight || '?'}kg] × `;
+        if (bilateral) line += `[L: ${set.leftReps || '?'}] [R: ${set.rightReps || '?'}]`;
+        else line += `[${set.reps || '?'} reps]`;
+        if (set.rir !== '') line += ` [${set.rir} RIR]`;
+        const p = document.createElement('div');
+        p.className = 'review-set-line';
+        p.textContent = line;
+        if (set.notes) { const ns = document.createElement('span'); ns.className = 'set-notes'; ns.textContent = ` — ${set.notes}`; p.appendChild(ns); }
+        exDiv.appendChild(p);
+      });
+      body.appendChild(exDiv);
+    });
+    block.appendChild(hdr); block.appendChild(body);
+    content.appendChild(block);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════════════
+function exportToCSV() {
+  const history = loadHistory(currentUser);
+  let csv = 'User,Date,Type,Duration,Exercise,Set,Weight(kg),Reps,Left Reps,Right Reps,RIR,Notes\n';
+  history.forEach(session => {
+    const date = formatDate(new Date(session.date));
+    const type = (session.type || '').toUpperCase();
+    const dur = formatDuration(session.duration || 0);
+    const user = (session.user || currentUser || '').toUpperCase();
+    Object.entries(session.exercises || {}).forEach(([exName, sets]) => {
+      sets.forEach((set, i) => {
+        csv += [`"${user}"`,`"${date}"`,`"${type}"`,`"${dur}"`,`"${exName}"`,
+          i + 1, set.weight || '', set.reps || '', set.leftReps || '', set.rightReps || '',
+          set.rir || '', `"${(set.notes || '').replace(/"/g, '""')}"`
+        ].join(',') + '\n';
+      });
+    });
+  });
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `lift-log-${currentUser}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// TIMER
+// ═══════════════════════════════════════════════════════════════
+function startTimer() {
+  stopTimer();
+  const el = document.getElementById('workout-timer');
+  timerInterval = setInterval(() => {
+    el.textContent = formatDuration(Math.floor((Date.now() - currentWorkout.startTime) / 1000));
+  }, 1000);
+}
+function stopTimer() { if (timerInterval) { clearInterval(timerInterval); timerInterval = null; } }
+
+// ═══════════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════════
+function safeId(name) { return name.replace(/[^a-z0-9]/gi, '_').toLowerCase(); }
+function formatDate(d) { return d.toLocaleDateString('en-GB', { weekday:'short', day:'numeric', month:'short', year:'numeric' }); }
+function formatDuration(secs) { const m = Math.floor(secs/60), s = secs%60; return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`; }
+</script>
+</body>
+</html>
